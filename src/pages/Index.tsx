@@ -27,6 +27,44 @@ const Index = () => {
       
       // Simulate processing delay then show results
       setTimeout(() => {
+        // Create dynamic responses based on actual query
+        const generateDynamicResponse = (provider: string, model: string) => {
+          const baseResponse = `Based on current trends and analysis for "${queryData.prompt}", here are the key insights:
+
+## Top Recommendations for ${new Date().getFullYear()}
+
+### 1. Premium Options
+- High-performance solutions with excellent build quality
+- Advanced features and cutting-edge technology
+- Recommended for professionals and enthusiasts
+
+### 2. Best Value Picks  
+- Optimal balance of price and performance
+- Great for everyday use and general applications
+- Popular among mainstream users
+
+### 3. Budget-Friendly Choices
+- Cost-effective options without compromising quality
+- Perfect for beginners or casual users
+- Excellent entry-level recommendations
+
+### 4. Emerging Trends
+- Latest innovations and upcoming technologies
+- Future-proof options worth considering
+- Industry predictions and market analysis
+
+### Key Factors to Consider:
+- Performance requirements and use cases
+- Budget constraints and value propositions
+- Long-term durability and reliability
+- User reviews and expert recommendations
+- Compatibility with existing setups
+
+This analysis is based on ${provider}'s comprehensive evaluation using ${model} technology.`;
+
+          return baseResponse;
+        };
+
         // Create dynamic mock results based on actual query
         const dynamicResults: QueryResults = {
           ...mockQueryResults,
@@ -37,7 +75,25 @@ const Index = () => {
             tags: queryData.tags,
             providers: queryData.providers,
             created_at: new Date().toISOString()
-          }
+          },
+          responses: queryData.providers.map((provider, index) => ({
+            id: `resp-${provider}-${index + 1}`,
+            provider: provider,
+            model: provider === 'openai' ? 'gpt-4' : 
+                   provider === 'claude' ? 'claude-3-sonnet' :
+                   provider === 'perplexity' ? 'llama-3.1-sonar-large-128k-online' :
+                   'gemini-pro',
+            response_text: generateDynamicResponse(provider, 
+              provider === 'openai' ? 'GPT-4' : 
+              provider === 'claude' ? 'Claude 3 Sonnet' :
+              provider === 'perplexity' ? 'Perplexity AI' :
+              'Gemini Pro'
+            ),
+            metadata: {
+              tokens_used: Math.floor(Math.random() * 200) + 300,
+              response_time_ms: Math.floor(Math.random() * 10000) + 15000
+            }
+          }))
         };
         
         setCurrentResults(dynamicResults);
