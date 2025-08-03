@@ -218,11 +218,14 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onSubmit, isLoading = fals
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Card className={`cursor-pointer transition-all border-2 ${
-                      formData.providers.includes(key as LLMProvider)
-                        ? `border-${provider.color} bg-${provider.color}/5`
-                        : 'border-border hover:border-primary/50'
-                    }`}>
+                    <Card 
+                      className={`cursor-pointer transition-all border-2 ${
+                        formData.providers.includes(key as LLMProvider)
+                          ? 'border-primary bg-primary/5 shadow-sm'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      onClick={() => handleProviderToggle(key as LLMProvider)}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
                           <Checkbox
@@ -230,7 +233,6 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onSubmit, isLoading = fals
                             checked={formData.providers.includes(key as LLMProvider)}
                             onCheckedChange={() => handleProviderToggle(key as LLMProvider)}
                             disabled={isLoading}
-                            className={`data-[state=checked]:bg-${provider.color} data-[state=checked]:border-${provider.color}`}
                           />
                           <div className="flex-1">
                             <Label 
