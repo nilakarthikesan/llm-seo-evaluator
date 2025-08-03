@@ -11,51 +11,61 @@ import { format } from 'date-fns';
 
 interface QueryHistoryProps {
   onQuerySelect: (query: Query) => void;
+  queries?: Query[];
   className?: string;
 }
 
-export const QueryHistory: React.FC<QueryHistoryProps> = ({ onQuerySelect, className = '' }) => {
-  const [queries, setQueries] = useState<Query[]>([]);
-  const [filteredQueries, setFilteredQueries] = useState<Query[]>([]);
+export const QueryHistory: React.FC<QueryHistoryProps> = ({ 
+  onQuerySelect, 
+  queries: providedQueries = [],
+  className = '' 
+}) => {
+  const [queries, setQueries] = useState<Query[]>(providedQueries);
+  const [filteredQueries, setFilteredQueries] = useState<Query[]>(providedQueries);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Mock data for development
+  // Update queries when providedQueries changes
   useEffect(() => {
-    const mockQueries: Query[] = [
-      {
-        id: 'q1',
-        prompt: 'Best SEO practices for e-commerce websites in 2024',
-        category: 'technical',
-        tags: ['ecommerce', 'best-practices', '2024'],
-        providers: ['openai', 'claude', 'perplexity'],
-        created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        status: 'complete'
-      },
-      {
-        id: 'q2', 
-        prompt: 'Content strategy for local businesses targeting voice search',
-        category: 'content',
-        tags: ['local-seo', 'voice-search', 'content-strategy'],
-        providers: ['openai', 'gemini'],
-        created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-        status: 'complete'
-      },
-      {
-        id: 'q3',
-        prompt: 'Python script for automating meta description optimization',
-        category: 'automation',
-        tags: ['python', 'automation', 'meta-descriptions'],
-        providers: ['claude', 'perplexity', 'gemini'],
-        created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
-        status: 'complete'
-      }
-    ];
-    
-    setQueries(mockQueries);
-    setFilteredQueries(mockQueries);
-  }, []);
+    if (providedQueries.length === 0) {
+      // Use mock data if no queries provided (for demonstration)
+      const mockQueries: Query[] = [
+        {
+          id: 'q1',
+          prompt: 'Best SEO practices for e-commerce websites in 2024',
+          category: 'technical',
+          tags: ['ecommerce', 'best-practices', '2024'],
+          providers: ['openai', 'claude', 'perplexity'],
+          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+          status: 'complete'
+        },
+        {
+          id: 'q2', 
+          prompt: 'Content strategy for local businesses targeting voice search',
+          category: 'content',
+          tags: ['local-seo', 'voice-search', 'content-strategy'],
+          providers: ['openai', 'gemini'],
+          created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+          status: 'complete'
+        },
+        {
+          id: 'q3',
+          prompt: 'Python script for automating meta description optimization',
+          category: 'automation',
+          tags: ['python', 'automation', 'meta-descriptions'],
+          providers: ['claude', 'perplexity', 'gemini'],
+          created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+          status: 'complete'
+        }
+      ];
+      setQueries(mockQueries);
+      setFilteredQueries(mockQueries);
+    } else {
+      setQueries(providedQueries);
+      setFilteredQueries(providedQueries);
+    }
+  }, [providedQueries]);
 
   // Filter queries based on search and filters
   useEffect(() => {

@@ -19,6 +19,7 @@ const Index = () => {
   const [currentQuery, setCurrentQuery] = useState<QuerySubmission | null>(null);
   const [queryId, setQueryId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('new-query');
+  const [queryHistory, setQueryHistory] = useState<Query[]>([]);
   const { toast } = useToast();
 
   const handleQuerySubmit = async (queryData: QuerySubmission) => {
@@ -286,6 +287,20 @@ Preparing for emerging search technologies:
       setShowResults(true);
       setShowProgress(false);
       setActiveTab('results');
+      
+      // Save completed query to history
+      const completedQuery: Query = {
+        id: queryId || `query-${Date.now()}`,
+        prompt: currentQuery.prompt,
+        category: currentQuery.category,
+        tags: currentQuery.tags,
+        providers: currentQuery.providers,
+        created_at: new Date().toISOString(),
+        status: 'complete'
+      };
+      
+      setQueryHistory(prev => [completedQuery, ...prev]);
+      
       toast({
         title: "Analysis Complete! ✨",
         description: "Your LLM responses have been analyzed and are ready for review.",
@@ -294,19 +309,43 @@ Preparing for emerging search technologies:
   };
 
   const handleHistoryQuerySelect = (query: Query) => {
-    // TODO: Load query results from API
     toast({
       title: "Loading Query Results",
       description: "Fetching results for the selected query...",
     });
     
-    // For now, simulate loading historical results
+    // Simulate loading historical results with the actual query data
     setTimeout(() => {
-      const mockHistoricalResults: QueryResults = {
+      // Generate mock results for the historical query
+      const historicalResults: QueryResults = {
         ...mockQueryResults,
-        query: query
+        query: query,
+        responses: query.providers.map((provider, index) => ({
+          id: `hist-resp-${provider}-${index + 1}`,
+          provider: provider,
+          model: provider === 'openai' ? 'gpt-4' : 
+                 provider === 'claude' ? 'claude-3-sonnet' :
+                 provider === 'perplexity' ? 'llama-3.1-sonar-large-128k-online' :
+                 'gemini-pro',
+          response_text: `Historical response from ${provider} for: "${query.prompt}"
+          
+This is a cached response that was generated when this query was originally submitted on ${new Date(query.created_at).toLocaleDateString()}.
+
+The analysis includes the same comprehensive insights that were provided during the original evaluation, allowing you to review and compare the responses from different providers.
+
+Original query details:
+- Category: ${query.category}
+- Tags: ${query.tags.join(', ')}
+- Submitted: ${new Date(query.created_at).toLocaleString()}
+- Status: ${query.status}`,
+          metadata: {
+            tokens_used: Math.floor(Math.random() * 100) + 300,
+            response_time_ms: Math.floor(Math.random() * 5000) + 10000
+          }
+        }))
       };
-      setCurrentResults(mockHistoricalResults);
+      
+      setCurrentResults(historicalResults);
       setShowResults(true);
       setActiveTab('results');
     }, 1000);
@@ -341,7 +380,10 @@ Preparing for emerging search technologies:
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">
-            <QueryHistory onQuerySelect={handleHistoryQuerySelect} />
+            <QueryHistory 
+              onQuerySelect={handleHistoryQuerySelect} 
+              queries={queryHistory}
+            />
           </TabsContent>
 
           <TabsContent value="progress" className="space-y-6">
