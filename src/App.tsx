@@ -8,8 +8,12 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-console.log('App component loading...');
-const App = () => (
+console.log('=== APP COMPONENT LOADING ===');
+
+const App = () => {
+  console.log('=== APP COMPONENT RENDERING ===');
+  try {
+    return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -22,7 +26,12 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+  } catch (error) {
+    console.error('=== APP COMPONENT ERROR ===', error);
+    return <div>App Error: {String(error)}</div>;
+  }
+};
 
 export default App;

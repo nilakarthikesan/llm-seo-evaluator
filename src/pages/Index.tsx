@@ -12,15 +12,20 @@ import { mockQueryResults } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentResults, setCurrentResults] = useState<QueryResults | null>(null);
-  const [showResults, setShowResults] = useState(false);
-  const [showProgress, setShowProgress] = useState(false);
-  const [currentQuery, setCurrentQuery] = useState<QuerySubmission | null>(null);
-  const [queryId, setQueryId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('new-query');
-  const [queryHistory, setQueryHistory] = useState<Query[]>([]);
-  const { toast } = useToast();
+  console.log('=== INDEX COMPONENT LOADING ===');
+  
+  try {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [currentResults, setCurrentResults] = useState<QueryResults | null>(null);
+    const [showResults, setShowResults] = useState(false);
+    const [showProgress, setShowProgress] = useState(false);
+    const [currentQuery, setCurrentQuery] = useState<QuerySubmission | null>(null);
+    const [queryId, setQueryId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<string>('new-query');
+    const [queryHistory, setQueryHistory] = useState<Query[]>([]);
+    const { toast } = useToast();
+    
+    console.log('=== INDEX STATE INITIALIZED ===');
 
   const handleQuerySubmit = async (queryData: QuerySubmission) => {
     setIsSubmitting(true);
@@ -360,6 +365,8 @@ Original query details:
     setActiveTab('new-query');
   };
 
+  console.log('=== INDEX RENDERING ===');
+  
   return (
     <Layout>
       <div className="space-y-8">
@@ -421,6 +428,10 @@ Original query details:
       </div>
     </Layout>
   );
+  } catch (error) {
+    console.error('=== INDEX COMPONENT ERROR ===', error);
+    return <div>Index Error: {String(error)}</div>;
+  }
 };
 
 export default Index;
