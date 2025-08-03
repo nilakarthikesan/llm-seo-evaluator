@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					muted: 'hsl(var(--primary-muted))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -61,6 +62,36 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				/* Custom LLM Dashboard Colors */
+				dashboard: {
+					bg: 'hsl(var(--dashboard-bg))'
+				},
+				comparison: {
+					card: 'hsl(var(--comparison-card))'
+				},
+				similarity: {
+					high: 'hsl(var(--similarity-high))',
+					medium: 'hsl(var(--similarity-medium))',
+					low: 'hsl(var(--similarity-low))'
+				},
+				provider: {
+					openai: 'hsl(var(--provider-openai))',
+					claude: 'hsl(var(--provider-claude))',
+					perplexity: 'hsl(var(--provider-perplexity))',
+					gemini: 'hsl(var(--provider-gemini))'
+				},
+				chart: {
+					primary: 'hsl(var(--chart-primary))',
+					secondary: 'hsl(var(--chart-secondary))',
+					tertiary: 'hsl(var(--chart-tertiary))',
+					quaternary: 'hsl(var(--chart-quaternary))'
+				},
+				status: {
+					pending: 'hsl(var(--status-pending))',
+					processing: 'hsl(var(--status-processing))',
+					complete: 'hsl(var(--status-complete))',
+					error: 'hsl(var(--status-error))'
 				}
 			},
 			borderRadius: {
@@ -84,11 +115,49 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-slow': {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.8'
+					}
+				},
+				'slide-up': {
+					'0%': {
+						transform: 'translateY(20px)',
+						opacity: '0'
+					},
+					'100%': {
+						transform: 'translateY(0px)',
+						opacity: '1'
+					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0'
+					},
+					'100%': {
+						opacity: '1'
+					}
+				},
+				'progress-bar': {
+					'0%': {
+						width: '0%'
+					},
+					'100%': {
+						width: '100%'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-slow': 'pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'slide-up': 'slide-up 0.5s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'progress-bar': 'progress-bar 1s ease-out'
 			}
 		}
 	},

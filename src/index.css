@@ -17,26 +17,65 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* LLM Evaluation Theme - Professional Blues & Analytics */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 98%;
+    --primary-muted: 217 91% 85%;
+    
+    --secondary: 224 71% 4%;
+    --secondary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 142 76% 36%;
+    --accent-foreground: 355 7% 97%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
 
     --radius: 0.5rem;
+
+    /* Custom LLM Dashboard Colors */
+    --dashboard-bg: 220 27% 98%;
+    --comparison-card: 0 0% 100%;
+    --similarity-high: 142 76% 36%;
+    --similarity-medium: 45 93% 47%;
+    --similarity-low: 0 84% 60%;
+    --provider-openai: 217 91% 60%;
+    --provider-claude: 271 81% 56%;
+    --provider-perplexity: 142 76% 36%;
+    --provider-gemini: 45 93% 47%;
+    
+    /* Analytics & Chart Colors */
+    --chart-primary: 217 91% 60%;
+    --chart-secondary: 271 81% 56%;
+    --chart-tertiary: 142 76% 36%;
+    --chart-quaternary: 45 93% 47%;
+    
+    /* Status & Progress Colors */
+    --status-pending: 45 93% 47%;
+    --status-processing: 217 91% 60%;
+    --status-complete: 142 76% 36%;
+    --status-error: 0 84% 60%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+    --gradient-dashboard: linear-gradient(180deg, hsl(220 27% 98%), hsl(220 14% 96%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 14% 98%));
+    
+    /* Shadows */
+    --shadow-card: 0 4px 6px -1px hsl(220 13% 91% / 0.1), 0 2px 4px -1px hsl(220 13% 91% / 0.06);
+    --shadow-elevated: 0 10px 15px -3px hsl(220 13% 91% / 0.1), 0 4px 6px -2px hsl(220 13% 91% / 0.05);
+    --shadow-comparison: 0 8px 25px -5px hsl(217 91% 60% / 0.1);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
