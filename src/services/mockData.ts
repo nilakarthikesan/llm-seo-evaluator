@@ -198,54 +198,69 @@ These tools integrate with modern APIs and leverage machine learning to provide 
   ],
   evaluation_metrics: {
     similarity_matrix: [
-      [1.0, 0.73, 0.68],
-      [0.73, 1.0, 0.71], 
-      [0.68, 0.71, 1.0]
+      [1.0, 0.72, 0.45, 0.68],    // OpenAI vs others
+      [0.72, 1.0, 0.51, 0.63],    // Claude vs others  
+      [0.45, 0.51, 1.0, 0.58],    // Perplexity vs others
+      [0.68, 0.63, 0.58, 1.0]     // Gemini vs others
     ],
     response_metrics: {
-      "resp-openai-1": {
-        originality_score: 0.73,
-        similarity_to_others: 0.27,
-        keyword_count: 15,
-        tool_mentions: ["Scrapy", "Selenium", "FastAPI", "BeautifulSoup", "Google Search Console"],
-        readability_score: 0.85
+      openai: {
+        originality_score: 8.7,
+        similarity_to_others: 0.62,
+        keyword_count: 87,
+        tool_mentions: ['Google Search Console', 'PageSpeed Insights', 'Screaming Frog', 'Ahrefs'],
+        readability_score: 9.2
       },
-      "resp-claude-2": {
-        originality_score: 0.67,
-        similarity_to_others: 0.33,
-        keyword_count: 18,
-        tool_mentions: ["Selenium", "Aiohttp", "Screaming Frog", "Ahrefs", "Google"],
-        readability_score: 0.78
+      claude: {
+        originality_score: 9.1,
+        similarity_to_others: 0.59,
+        keyword_count: 94,
+        tool_mentions: ['Core Web Vitals', 'WCAG 2.1', 'XML sitemap'],
+        readability_score: 9.6
       },
-      "resp-perplexity-3": {
-        originality_score: 0.81,
-        similarity_to_others: 0.19,
-        keyword_count: 22,
-        tool_mentions: ["OpenAI", "NLTK", "Lighthouse", "Google My Business", "PageSpeed Insights"],
-        readability_score: 0.82
+      perplexity: {
+        originality_score: 8.3,
+        similarity_to_others: 0.51,
+        keyword_count: 103,
+        tool_mentions: ['Google Business Profile', 'YouTube Shorts', 'ChatGPT integration'],
+        readability_score: 8.8
+      },
+      gemini: {
+        originality_score: 8.9,
+        similarity_to_others: 0.63,
+        keyword_count: 78,
+        tool_mentions: ['RankBrain', 'BERT', 'MUM', 'SGE'],
+        readability_score: 9.0
       }
     },
     cross_comparisons: [
       {
-        providers: ["openai", "claude"],
-        cosine_similarity: 0.73,
-        jaccard_similarity: 0.57,
-        common_keywords: ["python", "automation", "SEO", "scripts", "selenium", "analysis"],
-        tool_overlap: ["Selenium", "Google"]
+        providers: ['openai', 'claude'],
+        cosine_similarity: 0.72,
+        jaccard_similarity: 0.68,
+        common_keywords: ['content strategy', 'technical SEO', 'user experience', 'optimization'],
+        tool_overlap: ['Core Web Vitals']
       },
       {
-        providers: ["openai", "perplexity"],
-        cosine_similarity: 0.68,
-        jaccard_similarity: 0.51,
-        common_keywords: ["python", "automation", "SEO", "monitoring", "optimization"],
-        tool_overlap: ["Google"]
+        providers: ['openai', 'perplexity'],
+        cosine_similarity: 0.45,
+        jaccard_similarity: 0.41,
+        common_keywords: ['SEO strategy', 'keyword research', 'analytics'],
+        tool_overlap: ['Google Search Console']
       },
       {
-        providers: ["claude", "perplexity"],
-        cosine_similarity: 0.71,
-        jaccard_similarity: 0.63,
-        common_keywords: ["automation", "SEO", "monitoring", "analysis", "tools", "AI"],
-        tool_overlap: ["Google", "Lighthouse"]
+        providers: ['claude', 'gemini'],
+        cosine_similarity: 0.63,
+        jaccard_similarity: 0.59,
+        common_keywords: ['technical optimization', 'content framework', 'performance'],
+        tool_overlap: ['structured data', 'mobile optimization']
+      },
+      {
+        providers: ['perplexity', 'gemini'],
+        cosine_similarity: 0.58,
+        jaccard_similarity: 0.54,
+        common_keywords: ['algorithm updates', 'search trends', 'AI integration'],
+        tool_overlap: ['voice search optimization']
       }
     ]
   }

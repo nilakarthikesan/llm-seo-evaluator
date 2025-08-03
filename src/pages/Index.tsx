@@ -56,42 +56,192 @@ const Index = () => {
     
     // Generate results when progress completes
     setTimeout(() => {
-      // Create dynamic responses based on actual query
-      const generateDynamicResponse = (provider: string, model: string) => {
-        const baseResponse = `Based on current trends and analysis for "${currentQuery.prompt}", here are the key insights:
+      // Create realistic, diverse responses based on provider characteristics
+      const generateProviderResponse = (provider: string, model: string, prompt: string) => {
+        const responses: Record<string, string> = {
+          openai: `# GPT-4 Analysis: ${prompt}
 
-## Top Recommendations for ${new Date().getFullYear()}
+## Executive Summary
+Based on comprehensive analysis, here are the strategic recommendations for "${prompt}":
 
-### 1. Premium Options
-- High-performance solutions with excellent build quality
-- Advanced features and cutting-edge technology
-- Recommended for professionals and enthusiasts
+### 🎯 Primary Strategies
+1. **Content-First Approach**: Focus on high-quality, user-intent driven content
+2. **Technical Excellence**: Implement Core Web Vitals optimization
+3. **E-A-T Signals**: Establish expertise, authoritativeness, and trustworthiness
 
-### 2. Best Value Picks  
-- Optimal balance of price and performance
-- Great for everyday use and general applications
-- Popular among mainstream users
+### 📊 Implementation Roadmap
+**Phase 1 (0-30 days):**
+- Conduct comprehensive technical audit
+- Optimize page speed and mobile experience
+- Implement structured data markup
 
-### 3. Budget-Friendly Choices
-- Cost-effective options without compromising quality
-- Perfect for beginners or casual users
-- Excellent entry-level recommendations
+**Phase 2 (30-90 days):**
+- Content gap analysis and creation strategy
+- Internal linking optimization
+- Local SEO improvements (if applicable)
 
-### 4. Emerging Trends
-- Latest innovations and upcoming technologies
-- Future-proof options worth considering
-- Industry predictions and market analysis
+### 🔧 Tools & Technologies
+- Google Search Console for monitoring
+- PageSpeed Insights for performance
+- Screaming Frog for technical SEO
+- Ahrefs/SEMrush for keyword research
 
-### Key Factors to Consider:
-- Performance requirements and use cases
-- Budget constraints and value propositions
-- Long-term durability and reliability
-- User reviews and expert recommendations
-- Compatibility with existing setups
+### 📈 Expected Results
+- 25-40% increase in organic traffic within 6 months
+- Improved SERP rankings for target keywords
+- Enhanced user engagement metrics
 
-This analysis is based on ${provider}'s comprehensive evaluation using ${model} technology.`;
+*Analysis powered by GPT-4's advanced reasoning capabilities*`,
 
-        return baseResponse;
+          claude: `# Claude's Comprehensive SEO Strategy: ${prompt}
+
+## Thoughtful Analysis & Recommendations
+
+I've carefully analyzed your query about "${prompt}" and here's my structured approach:
+
+### 🧠 Strategic Thinking
+The modern SEO landscape requires a holistic approach that balances technical excellence with genuine user value. Let me break this down systematically:
+
+### 📋 Detailed Action Plan
+
+**1. Content Strategy Framework**
+- Develop topic clusters around your core themes
+- Create pillar pages with supporting content
+- Focus on search intent alignment
+- Implement semantic keyword strategies
+
+**2. Technical Foundation**
+- Core Web Vitals optimization (LCP, FID, CLS)
+- Mobile-first indexing compliance
+- SSL implementation and security headers
+- XML sitemap optimization
+
+**3. User Experience Priorities**
+- Intuitive navigation structure
+- Clear call-to-action placement
+- Accessibility compliance (WCAG 2.1)
+- Page loading speed optimization
+
+### 🔍 Analytical Considerations
+From my analysis, the key differentiator will be:
+- Quality over quantity in content creation
+- Long-term sustainable growth strategies
+- Risk assessment for algorithm changes
+- Competitive advantage identification
+
+### 🎯 Success Metrics
+- Organic click-through rates
+- Average session duration
+- Conversion rate improvements
+- Brand mention tracking
+
+*Thoughtfully crafted by Claude with attention to nuance and context*`,
+
+          perplexity: `# Real-Time SEO Intelligence: ${prompt}
+
+## Current Market Analysis (Updated December 2024)
+
+Based on the latest search trends and algorithm updates, here's what's working now for "${prompt}":
+
+### 🌐 Latest Industry Insights
+According to recent Google algorithm updates and industry reports:
+
+**Recent Algorithm Changes:**
+- December 2024 Helpful Content Update focuses on first-hand experience
+- Core Web Vitals now include Interaction to Next Paint (INP)
+- AI-generated content detection improvements
+
+### 📈 Trending Strategies (Live Data)
+1. **Zero-Click Optimization**: Featured snippets and People Also Ask
+2. **Video SEO Integration**: YouTube Shorts for quick wins
+3. **Local Pack Optimization**: Google Business Profile enhancements
+4. **Voice Search Adaptation**: Conversational keyword targeting
+
+### 🔄 Real-Time Competitive Analysis
+Current top performers in your space are focusing on:
+- Interactive content experiences
+- Community-driven engagement
+- Multi-channel content distribution
+- Rapid response to trending topics
+
+### 📊 Live Performance Metrics
+- Average CTR for position 1: 28.5% (industry data)
+- Mobile traffic share: 63.7% (Q4 2024)
+- Voice search queries: 27% of all searches
+
+### 🛠️ Actionable Next Steps
+Based on current search patterns:
+1. Implement FAQ schema for voice search
+2. Optimize for "near me" local queries
+3. Create timely, newsworthy content
+4. Leverage real-time social signals
+
+### 📱 Platform-Specific Recommendations
+- **Google**: Focus on E-E-A-T and helpful content
+- **Bing**: Optimize for ChatGPT integration
+- **YouTube**: Short-form educational content
+- **Social**: Cross-platform content syndication
+
+*Powered by Perplexity's real-time web search and current data*`,
+
+          gemini: `# Google Gemini SEO Analysis: ${prompt}
+
+## Multimodal Intelligence Report
+
+Comprehensive evaluation of "${prompt}" using advanced AI reasoning:
+
+### 🎯 Strategic Overview
+Leveraging Google's deep understanding of search ecosystems, here's the optimal approach:
+
+### 🔬 Advanced Technical Analysis
+
+**Core Algorithm Alignment:**
+- RankBrain compatibility scoring
+- BERT semantic understanding optimization
+- MUM (Multitask Unified Model) content structuring
+- Helpful Content System compliance
+
+**Performance Optimization Stack:**
+Technical SEO Foundation includes Core Web Vitals (LCP < 2.5s, CLS < 0.1), Mobile-First Architecture, Structured Data Implementation, and International SEO (hreflang).
+
+### 🎨 Content Intelligence Framework
+
+**1. Semantic Content Mapping**
+- Entity relationship modeling
+- Topic authority development
+- Content depth vs. breadth analysis
+- User journey optimization
+
+**2. Visual Content Strategy**
+- Image SEO with descriptive alt text
+- Video content optimization
+- Infographic keyword targeting
+- Visual search preparation
+
+### 🚀 Innovation Opportunities
+- AI-assisted content creation workflows
+- Automated technical SEO monitoring
+- Predictive keyword trend analysis
+- Voice and visual search optimization
+
+### 📊 Measurement & Analytics
+**KPI Dashboard:**
+- Organic visibility index
+- Content performance scoring
+- Technical health monitoring
+- Competitive positioning analysis
+
+### 🔮 Future-Proofing Strategy
+Preparing for emerging search technologies:
+- SGE (Search Generative Experience) optimization
+- Conversational AI integration
+- Augmented reality search features
+- IoT device optimization
+
+*Generated by Google Gemini with comprehensive web knowledge integration*`
+        };
+
+        return responses[provider] || responses.openai;
       };
 
       // Create dynamic mock results based on actual query
@@ -112,15 +262,22 @@ This analysis is based on ${provider}'s comprehensive evaluation using ${model} 
                    provider === 'claude' ? 'claude-3-sonnet' :
                    provider === 'perplexity' ? 'llama-3.1-sonar-large-128k-online' :
                    'gemini-pro',
-            response_text: generateDynamicResponse(provider, 
+            response_text: generateProviderResponse(provider, 
               provider === 'openai' ? 'GPT-4' : 
               provider === 'claude' ? 'Claude 3 Sonnet' :
               provider === 'perplexity' ? 'Perplexity AI' :
-              'Gemini Pro'
+              'Gemini Pro',
+              currentQuery.prompt
             ),
             metadata: {
-              tokens_used: Math.floor(Math.random() * 200) + 300,
-              response_time_ms: Math.floor(Math.random() * 10000) + 15000
+              tokens_used: provider === 'openai' ? Math.floor(Math.random() * 100) + 450 :
+                          provider === 'claude' ? Math.floor(Math.random() * 150) + 520 :
+                          provider === 'perplexity' ? Math.floor(Math.random() * 80) + 380 :
+                          Math.floor(Math.random() * 120) + 420,
+              response_time_ms: provider === 'openai' ? Math.floor(Math.random() * 5000) + 12000 :
+                               provider === 'claude' ? Math.floor(Math.random() * 8000) + 15000 :
+                               provider === 'perplexity' ? Math.floor(Math.random() * 6000) + 18000 :
+                               Math.floor(Math.random() * 7000) + 14000
             }
           }))
       };
