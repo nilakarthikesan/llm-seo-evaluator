@@ -27,7 +27,20 @@ const Index = () => {
       
       // Simulate processing delay then show results
       setTimeout(() => {
-        setCurrentResults(mockQueryResults);
+        // Create dynamic mock results based on actual query
+        const dynamicResults: QueryResults = {
+          ...mockQueryResults,
+          query: {
+            ...mockQueryResults.query,
+            prompt: queryData.prompt,
+            category: queryData.category,
+            tags: queryData.tags,
+            providers: queryData.providers,
+            created_at: new Date().toISOString()
+          }
+        };
+        
+        setCurrentResults(dynamicResults);
         setShowResults(true);
         toast({
           title: "Analysis Complete! ✨",
