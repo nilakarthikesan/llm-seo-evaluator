@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { QueryForm } from '@/components/query/QueryForm';
-import { QuerySubmission } from '@/types/llm';
+import { ResultsDashboard } from '@/components/results/ResultsDashboard';
+import { QuerySubmission, QueryResults } from '@/types/llm';
 import { apiClient } from '@/services/api';
+import { mockQueryResults } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentResults, setCurrentResults] = useState<QueryResults | null>(null);
+  const [showResults, setShowResults] = useState(false);
   const { toast } = useToast();
 
   const handleQuerySubmit = async (queryData: QuerySubmission) => {
@@ -21,7 +25,16 @@ const Index = () => {
         description: `Query ${response.query_id} is being processed by ${queryData.providers.length} LLM providers.`,
       });
       
-      // TODO: Navigate to progress/results page
+      // Simulate processing delay then show results
+      setTimeout(() => {
+        setCurrentResults(mockQueryResults);
+        setShowResults(true);
+        toast({
+          title: "Analysis Complete! ✨",
+          description: "Your LLM responses have been analyzed and are ready for review.",
+        });
+      }, 2000);
+      
       console.log('Query response:', response);
       
     } catch (error) {
@@ -36,13 +49,37 @@ const Index = () => {
     }
   };
 
+  const handleNewQuery = () => {
+    setShowResults(false);
+    setCurrentResults(null);
+  };
+
   return (
     <Layout>
       <div className="space-y-8">
-        <QueryForm 
-          onSubmit={handleQuerySubmit}
-          isLoading={isSubmitting}
-        />
+        {!showResults ? (
+          <QueryForm 
+            onSubmit={handleQuerySubmit}
+            isLoading={isSubmitting}
+          />
+        ) : currentResults ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold">Analysis Results</h1>
+              <button
+                onClick={handleNewQuery}
+                className="px-4 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                ← New Query
+              </button>
+            </div>
+            <ResultsDashboard results={currentResults} />
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Loading results...</p>
+          </div>
+        )}
       </div>
     </Layout>
   );
