@@ -4,6 +4,7 @@ import { ResponseCard } from './ResponseCard';
 import { MetricsOverview } from './MetricsOverview';
 import { ComparisonMatrix } from './ComparisonMatrix';
 import { SimilarityChart } from './SimilarityChart';
+import { ExportPDF } from '@/components/export/ExportPDF';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -80,10 +81,11 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results }) =
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="responses" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="responses">LLM Responses</TabsTrigger>
           <TabsTrigger value="comparison">Comparison</TabsTrigger>
           <TabsTrigger value="analysis">Analysis</TabsTrigger>
+          <TabsTrigger value="export">Export</TabsTrigger>
         </TabsList>
 
         <TabsContent value="responses" className="space-y-4">
@@ -92,7 +94,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results }) =
               <ResponseCard
                 key={response.id}
                 response={response}
-                metrics={evaluation_metrics.response_metrics[response.id]}
+                metrics={evaluation_metrics.response_metrics[response.provider]}
               />
             ))}
           </div>
@@ -110,6 +112,10 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results }) =
             similarityMatrix={evaluation_metrics.similarity_matrix}
             providers={query.providers}
           />
+        </TabsContent>
+
+        <TabsContent value="export" className="space-y-4">
+          <ExportPDF results={results} />
         </TabsContent>
       </Tabs>
     </div>
