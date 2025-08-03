@@ -224,7 +224,6 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onSubmit, isLoading = fals
                           ? 'border-primary bg-primary/5 shadow-sm'
                           : 'border-border hover:border-primary/50'
                       }`}
-                      onClick={() => handleProviderToggle(key as LLMProvider)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
