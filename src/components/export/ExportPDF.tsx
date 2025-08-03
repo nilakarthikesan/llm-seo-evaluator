@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download, FileText, Loader2, CheckCircle } from 'lucide-react';
 import { QueryResults } from '@/types/llm';
-import { pdfExportService } from '@/services/pdfExport';
+// import { pdfExportService } from '@/services/pdfExport';
 import { useToast } from '@/hooks/use-toast';
 
 interface ExportPDFProps {
@@ -38,12 +38,16 @@ export const ExportPDF: React.FC<ExportPDFProps> = ({ results, className = '' })
     setIsSuccess(false);
     
     try {
-      await pdfExportService.exportResults(results, options);
+      // Temporarily disabled PDF export functionality
+      // await pdfExportService.exportResults(results, options);
+      
+      // Simulate export for now
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       setIsSuccess(true);
       toast({
-        title: "PDF Export Successful! 📄",
-        description: "Your analysis report has been downloaded successfully.",
+        title: "PDF Export (Demo) 📄",
+        description: "PDF export functionality will be available soon. This is a demo of the interface.",
       });
       
       // Reset success state after 3 seconds
