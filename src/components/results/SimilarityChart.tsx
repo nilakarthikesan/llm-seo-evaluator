@@ -34,10 +34,20 @@ export const SimilarityChart: React.FC<SimilarityChartProps> = ({
     return `opacity-${Math.round(intensity * 100)}`;
   };
 
-  // Calculate average similarities (excluding self-similarity)
+  // Ensure similarity matrix matches provider count
+  const adjustedMatrix = similarityMatrix.slice(0, providers.length).map(row => 
+    row ? row.slice(0, providers.length) : []
+  );
+
+  // Calculate average similarities (excluding self-similarity) with safety checks
   const avgSimilarities = providers.map((_, providerIndex) => {
-    const similarities = similarityMatrix[providerIndex].filter((_, idx) => idx !== providerIndex);
-    return similarities.reduce((sum, sim) => sum + sim, 0) / similarities.length;
+    const row = adjustedMatrix[providerIndex];
+    if (!row || row.length === 0) return 0;
+    
+    const similarities = row.filter((_, idx) => idx !== providerIndex);
+    return similarities.length > 0 
+      ? similarities.reduce((sum, sim) => sum + sim, 0) / similarities.length 
+      : 0;
   });
 
   return (
@@ -70,7 +80,7 @@ export const SimilarityChart: React.FC<SimilarityChartProps> = ({
               {/* Matrix Grid */}
               <div className="space-y-2">
                 {/* Header Row */}
-                <div className="grid grid-cols-4 gap-1">
+                <div className={`grid gap-1`} style={{ gridTemplateColumns: `auto repeat(${providers.length}, 1fr)` }}>
                   <div className="text-xs font-medium p-2"></div>
                   {providers.map((provider, idx) => (
                     <div key={idx} className="text-xs font-medium p-2 text-center">
@@ -80,8 +90,8 @@ export const SimilarityChart: React.FC<SimilarityChartProps> = ({
                 </div>
 
                 {/* Data Rows */}
-                {similarityMatrix.map((row, rowIdx) => (
-                  <div key={rowIdx} className="grid grid-cols-4 gap-1">
+                {adjustedMatrix.map((row, rowIdx) => (
+                  <div key={rowIdx} className={`grid gap-1`} style={{ gridTemplateColumns: `auto repeat(${providers.length}, 1fr)` }}>
                     <div className="text-xs font-medium p-2 flex items-center">
                       <div className={`w-2 h-2 rounded-full bg-${getProviderColor(providers[rowIdx])} mr-2`} />
                       {providers[rowIdx].slice(0, 3).toUpperCase()}
