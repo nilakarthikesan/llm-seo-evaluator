@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { QueryForm } from '@/components/query/QueryForm';
+import { ProgressTracker } from '@/components/query/ProgressTracker';
 import { ResultsDashboard } from '@/components/results/ResultsDashboard';
-import { QuerySubmission, QueryResults } from '@/types/llm';
+import { QueryHistory } from '@/components/history/QueryHistory';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { QuerySubmission, QueryResults, Query } from '@/types/llm';
 import { apiClient } from '@/services/api';
 import { mockQueryResults } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
@@ -11,25 +15,50 @@ const Index = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentResults, setCurrentResults] = useState<QueryResults | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState<QuerySubmission | null>(null);
+  const [queryId, setQueryId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('new-query');
   const { toast } = useToast();
 
   const handleQuerySubmit = async (queryData: QuerySubmission) => {
     setIsSubmitting(true);
+    setCurrentQuery(queryData);
     
     try {
       console.log('Submitting query:', queryData);
       const response = await apiClient.submitQuery(queryData);
+      setQueryId(response.query_id);
       
       toast({
         title: "Query Submitted Successfully! 🚀",
         description: `Query ${response.query_id} is being processed by ${queryData.providers.length} LLM providers.`,
       });
       
-      // Simulate processing delay then show results
-      setTimeout(() => {
-        // Create dynamic responses based on actual query
-        const generateDynamicResponse = (provider: string, model: string) => {
-          const baseResponse = `Based on current trends and analysis for "${queryData.prompt}", here are the key insights:
+      // Show progress tracker
+      setIsSubmitting(false);
+      setShowProgress(true);
+      setActiveTab('progress');
+      
+    } catch (error) {
+      console.error('Error submitting query:', error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your query. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleProgressComplete = () => {
+    if (!currentQuery) return;
+    
+    // Generate results when progress completes
+    setTimeout(() => {
+      // Create dynamic responses based on actual query
+      const generateDynamicResponse = (provider: string, model: string) => {
+        const baseResponse = `Based on current trends and analysis for "${currentQuery.prompt}", here are the key insights:
 
 ## Top Recommendations for ${new Date().getFullYear()}
 
@@ -62,21 +91,21 @@ const Index = () => {
 
 This analysis is based on ${provider}'s comprehensive evaluation using ${model} technology.`;
 
-          return baseResponse;
-        };
+        return baseResponse;
+      };
 
-        // Create dynamic mock results based on actual query
-        const dynamicResults: QueryResults = {
+      // Create dynamic mock results based on actual query
+      const dynamicResults: QueryResults = {
           ...mockQueryResults,
           query: {
             ...mockQueryResults.query,
-            prompt: queryData.prompt,
-            category: queryData.category,
-            tags: queryData.tags,
-            providers: queryData.providers,
+            prompt: currentQuery.prompt,
+            category: currentQuery.category,
+            tags: currentQuery.tags,
+            providers: currentQuery.providers,
             created_at: new Date().toISOString()
           },
-          responses: queryData.providers.map((provider, index) => ({
+          responses: currentQuery.providers.map((provider, index) => ({
             id: `resp-${provider}-${index + 1}`,
             provider: provider,
             model: provider === 'openai' ? 'gpt-4' : 
@@ -94,61 +123,102 @@ This analysis is based on ${provider}'s comprehensive evaluation using ${model} 
               response_time_ms: Math.floor(Math.random() * 10000) + 15000
             }
           }))
-        };
-        
-        setCurrentResults(dynamicResults);
-        setShowResults(true);
-        toast({
-          title: "Analysis Complete! ✨",
-          description: "Your LLM responses have been analyzed and are ready for review.",
-        });
-      }, 2000);
+      };
       
-      console.log('Query response:', response);
-      
-    } catch (error) {
-      console.error('Error submitting query:', error);
+      setCurrentResults(dynamicResults);
+      setShowResults(true);
+      setShowProgress(false);
+      setActiveTab('results');
       toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your query. Please try again.",
-        variant: "destructive",
+        title: "Analysis Complete! ✨",
+        description: "Your LLM responses have been analyzed and are ready for review.",
       });
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, 1000); // Shorter delay for demo
+  };
+
+  const handleHistoryQuerySelect = (query: Query) => {
+    // TODO: Load query results from API
+    toast({
+      title: "Loading Query Results",
+      description: "Fetching results for the selected query...",
+    });
+    
+    // For now, simulate loading historical results
+    setTimeout(() => {
+      const mockHistoricalResults: QueryResults = {
+        ...mockQueryResults,
+        query: query
+      };
+      setCurrentResults(mockHistoricalResults);
+      setShowResults(true);
+      setActiveTab('results');
+    }, 1000);
   };
 
   const handleNewQuery = () => {
     setShowResults(false);
+    setShowProgress(false);
     setCurrentResults(null);
+    setCurrentQuery(null);
+    setQueryId(null);
+    setActiveTab('new-query');
   };
 
   return (
     <Layout>
       <div className="space-y-8">
-        {!showResults ? (
-          <QueryForm 
-            onSubmit={handleQuerySubmit}
-            isLoading={isSubmitting}
-          />
-        ) : currentResults ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">Analysis Results</h1>
-              <button
-                onClick={handleNewQuery}
-                className="px-4 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-              >
-                ← New Query
-              </button>
-            </div>
-            <ResultsDashboard results={currentResults} />
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">Loading results...</p>
-          </div>
-        )}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="new-query">New Query</TabsTrigger>
+            <TabsTrigger value="history">Query History</TabsTrigger>
+            <TabsTrigger value="results" disabled={!currentResults && !showProgress}>
+              {showProgress ? 'Progress' : 'Results'}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="new-query" className="space-y-6">
+            <QueryForm 
+              onSubmit={handleQuerySubmit}
+              isLoading={isSubmitting}
+            />
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <QueryHistory onQuerySelect={handleHistoryQuerySelect} />
+          </TabsContent>
+
+          <TabsContent value="progress" className="space-y-6">
+            {showProgress && currentQuery && queryId ? (
+              <ProgressTracker
+                queryId={queryId}
+                providers={currentQuery.providers}
+                onComplete={handleProgressComplete}
+              />
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                No active query processing
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="results" className="space-y-6">
+            {currentResults ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold">Analysis Results</h1>
+                  <Button onClick={handleNewQuery} variant="outline">
+                    New Query
+                  </Button>
+                </div>
+                <ResultsDashboard results={currentResults} />
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                No results available
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
