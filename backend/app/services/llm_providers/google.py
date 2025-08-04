@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class GoogleProvider(BaseLLMProvider):
     """Google Gemini provider implementation"""
     
-    def __init__(self, api_key: str, model: str = "gemini-pro", **kwargs):
+    def __init__(self, api_key: str, model: str = "gemini-1.5-pro", **kwargs):
         super().__init__(api_key, model, **kwargs)
         # Configure Google AI
         genai.configure(api_key=self.api_key)
@@ -42,16 +42,23 @@ Question: {prompt}"""
             # Extract response
             response_text = response.text
             
-            # Prepare metadata
+            # Prepare metadata - handle different response structures
             metadata = {
                 "model": self.model,
                 "finish_reason": response.candidates[0].finish_reason if response.candidates else None,
-                "usage": {
-                    "prompt_tokens": response.usage_metadata.prompt_token_count if response.usage_metadata else None,
-                    "completion_tokens": response.usage_metadata.candidates_token_count if response.usage_metadata else None,
-                    "total_tokens": response.usage_metadata.total_token_count if response.usage_metadata else None
-                } if response.usage_metadata else None
+                "usage": None  # Google API doesn't always provide usage metadata
             }
+            
+            # Try to get usage metadata if available
+            try:
+                if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                    metadata["usage"] = {
+                        "prompt_tokens": getattr(response.usage_metadata, 'prompt_token_count', None),
+                        "completion_tokens": getattr(response.usage_metadata, 'candidates_token_count', None),
+                        "total_tokens": getattr(response.usage_metadata, 'total_token_count', None)
+                    }
+            except Exception as e:
+                logger.warning(f"Could not extract usage metadata: {e}")
             
             # Calculate tokens (approximate)
             tokens_used = len(response_text.split()) * 1.3  # Rough approximation

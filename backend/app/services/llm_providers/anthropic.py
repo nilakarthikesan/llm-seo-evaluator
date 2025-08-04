@@ -13,8 +13,8 @@ class AnthropicProvider(BaseLLMProvider):
     
     def __init__(self, api_key: str, model: str = "claude-3-5-sonnet-20241022", **kwargs):
         super().__init__(api_key, model, **kwargs)
-        # Store API key for the anthropic library
-        self.api_key = api_key
+        # Create Anthropic client with the correct API
+        self.client = anthropic.Anthropic(api_key=api_key)
     
     def get_provider_name(self) -> str:
         return "anthropic"
@@ -22,23 +22,8 @@ class AnthropicProvider(BaseLLMProvider):
     async def query(self, prompt: str, **kwargs) -> LLMResponse:
         """Execute query against Anthropic API"""
         try:
-            # Create client with explicit httpx configuration to avoid proxies issue
-            import httpx
-            
-            # Create a custom httpx client without proxies
-            http_client = httpx.Client(
-                timeout=httpx.Timeout(self.timeout),
-                # Explicitly not passing proxies
-            )
-            
-            # Create Anthropic client with our custom http_client
-            client = anthropic.Anthropic(
-                api_key=self.api_key,
-                http_client=http_client
-            )
-            
-            # Use the correct API for anthropic 0.60.0
-            response = client.messages.create(
+            # Use the correct API for anthropic 0.7.8+
+            response = self.client.messages.create(
                 model=self.model,
                 max_tokens=kwargs.get('max_tokens', 2000),
                 temperature=kwargs.get('temperature', 0.7),

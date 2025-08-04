@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class PerplexityProvider(BaseLLMProvider):
     """Perplexity AI provider implementation"""
     
-    def __init__(self, api_key: str, model: str = "llama-3.1-sonar-small-128k-online", **kwargs):
+    def __init__(self, api_key: str, model: str = "llama-3.1-sonar-small-128k", **kwargs):
         super().__init__(api_key, model, **kwargs)
         self.api_url = "https://api.perplexity.ai/chat/completions"
     

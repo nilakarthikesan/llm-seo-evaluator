@@ -1,8 +1,13 @@
-# FastAPI and core dependencies
+# Core FastAPI and web framework
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-pydantic>=2.11.7,<3.0
+
+# Pydantic and settings (compatible versions)
+pydantic==2.11.7
 pydantic-settings==2.1.0
+
+# HTTP client (compatible with Supabase)
+httpx==0.28.1
 
 # Database
 sqlalchemy==2.0.23
@@ -14,11 +19,10 @@ asyncpg==0.29.0
 redis==5.0.1
 celery==5.3.4
 
-# LLM Providers
-openai>=1.3.7
-anthropic>=0.7.8
+# LLM Providers (latest stable versions)
+openai==1.98.0
+anthropic==0.60.0
 google-generativeai==0.3.2
-httpx>=0.28.1,<0.29
 
 # ML and Analysis
 sentence-transformers==2.2.2

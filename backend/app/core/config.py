@@ -45,8 +45,8 @@ class Settings(BaseSettings):
     default_models: dict = {
         "openai": "gpt-4",
         "anthropic": "claude-3-5-sonnet-20241022",
-        "perplexity": "llama-3.1-sonar-small-128k-online",
-        "google": "gemini-pro"
+        "perplexity": "sonar-pro",
+        "google": "gemini-1.5-pro"
     }
     
     # Evaluation Settings

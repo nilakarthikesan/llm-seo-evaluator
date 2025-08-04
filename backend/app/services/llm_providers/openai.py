@@ -12,8 +12,8 @@ class OpenAIProvider(BaseLLMProvider):
     
     def __init__(self, api_key: str, model: str = "gpt-4", **kwargs):
         super().__init__(api_key, model, **kwargs)
-        # Set API key for the older openai library
-        openai.api_key = api_key
+        # Create client with new API syntax
+        self.client = openai.AsyncOpenAI(api_key=api_key)
     
     def get_provider_name(self) -> str:
         return "openai"
@@ -33,8 +33,8 @@ class OpenAIProvider(BaseLLMProvider):
                 }
             ]
             
-            # Make API call using the older openai library
-            response = await openai.ChatCompletion.acreate(
+            # Make API call using the new openai library syntax
+            response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 max_tokens=kwargs.get('max_tokens', 2000),
@@ -79,4 +79,4 @@ class OpenAIProvider(BaseLLMProvider):
             "gpt-4-turbo-preview",
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-16k"
-        ] 
+        ]
