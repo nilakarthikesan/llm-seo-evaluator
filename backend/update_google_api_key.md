@@ -1,32 +1,11 @@
-# Google API Key Update Guide
+# Google provider configuration
 
-## After getting your paid plan API key:
+Set `GOOGLE_API_KEY` in `backend/.env` or the process environment. Keep credentials outside the source files.
 
-1. **Update your .env file**:
-   ```bash
-   # In backend/.env
-   GOOGLE_API_KEY=your_new_paid_plan_api_key_here
-   ```
+From the backend directory, the development script can exercise configured Google models:
 
-2. **Test the new key**:
-   ```bash
-   python test_google_models.py
-   ```
+```bash
+python test_google_models.py
+```
 
-3. **Switch back to gemini-1.5-pro** (better model with paid plan):
-   ```bash
-   # In backend/app/core/config.py, change:
-   "google": "gemini-1.5-pro"  # Instead of gemini-1.5-flash
-   ```
-
-## Paid Plan Benefits:
-- **Higher rate limits**: 15 requests/second vs 1 request/second
-- **Higher daily limits**: 1,500 requests/day vs 150 requests/day
-- **Better models**: Access to gemini-1.5-pro (more powerful)
-- **No rate limiting**: Smooth development experience
-
-## Pricing (Approximate):
-- **Input tokens**: $0.00025 / 1K tokens
-- **Output tokens**: $0.0005 / 1K tokens
-- **Typical cost**: $1-5/month for development
-- **Budget alerts**: Set up to avoid surprises 
+The script makes live API requests. Model selection is configured in `app/core/config.py` and the provider adapter. The checked-in defaults are historical; confirm model availability, quotas, and pricing for the configured account before a live run. A paid account can still be rate limited.

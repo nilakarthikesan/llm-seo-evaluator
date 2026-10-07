@@ -1,206 +1,153 @@
-# LLM SEO Evaluation Agent
+# LLM SEO evaluator
 
-A comprehensive system for querying multiple Large Language Models (LLMs) with SEO-related prompts and performing systematic auditing of their responses. The system enables cross-model comparison, trend analysis, and quality assessment of AI-generated SEO advice.
+A prototype for sending the same SEO question to several language model
+providers and comparing their responses. It includes a React interface, a
+FastAPI backend, provider adapters, Supabase storage, and text-analysis metrics.
 
-## 🎯 Project Overview
+## Implemented components
 
-This tool allows SEO professionals, digital marketers, and content strategists to:
+| Component | Implementation |
+|---|---|
+| Query and result interface | React, TypeScript, Tailwind CSS, shadcn/ui, and Recharts |
+| API | FastAPI routes for queries, status, responses, and analytics |
+| Provider adapters | OpenAI, Anthropic, Perplexity, and Google |
+| Query execution | FastAPI background tasks and concurrent provider calls with `asyncio.gather` |
+| Persistence | Supabase services for queries, responses, and evaluation metrics |
+| Progress updates | HTTP polling |
+| Response comparison | Word overlap, keyword/tool extraction, and readability-style heuristics |
 
-- **Compare AI Responses**: Submit SEO questions to multiple LLM providers (OpenAI, Claude, Perplexity, Gemini) simultaneously
-- **Analyze Similarities**: Get detailed similarity analysis between different AI responses
-- **Quality Assessment**: Evaluate originality, factuality, and readability of AI-generated SEO advice
-- **Trend Analysis**: Track patterns and changes in AI responses over time
-- **Export Results**: Download comprehensive reports and share findings
+The source also contains SQLAlchemy models and Redis configuration from the
+initial design. The current query path uses Supabase and in-process background
+tasks; it does not use a Celery worker.
 
-## 🏗️ Architecture
+## What the metrics mean
 
-### Technology Stack
-- **Frontend**: React + TypeScript + Tailwind CSS + shadcn/ui
-- **Backend**: FastAPI + Python 3.11+
-- **Database**: PostgreSQL with SQLAlchemy ORM
-- **Queue System**: Redis + Celery for async task processing
-- **LLM Providers**: OpenAI GPT-4, Anthropic Claude, Perplexity, Google Gemini
+`backend/app/services/evaluation.py` implements the current metrics:
 
-### System Architecture
+- **Similarity:** Jaccard overlap of lowercased word sets. The optional
+  scikit-learn path is disabled.
+- **Originality:** word overlap relative to the other responses in the same
+  comparison.
+- **Readability:** a heuristic based on sentence length and word length.
+- **Keyword and tool counts:** matches against configured SEO terms and tool
+  names.
+- **`factuality_score`:** the frequency of phrases such as “according to” and
+  “research shows.” This field measures phrasing, not factual correctness.
+
+These metrics help inspect textual differences. They are not a validated measure
+of SEO quality, truthfulness, or model safety.
+
+## Frontend setup
+
+```bash
+git clone https://github.com/nilakarthikesan/llm-seo-evaluator.git
+cd llm-seo-evaluator/frontend
+npm install
+npm run dev
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Frontend │    │   FastAPI       │    │   PostgreSQL    │
-│   - Query Input  │◄──►│   Backend       │◄──►│   Database      │
-│   - Results View │    │   - API Routes  │    │   - Responses   │
-│   - Analytics    │    │   - Evaluation  │    │   - Metrics     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   Redis Queue   │
-                       │   - Async Tasks │
-                       │   - Rate Limiting│
-                       └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   LLM Providers │
-                       │   - OpenAI      │
-                       │   - Claude      │
-                       │   - Perplexity  │
-                       └─────────────────┘
-```
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+
-- Python 3.11+
-- PostgreSQL 15+
-- Redis 7+
-- Docker & Docker Compose (optional)
-
-### Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd llm-seo-evaluator
-   ```
-
-2. **Install frontend dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys and database credentials
-   ```
-
-4. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
-
-### Environment Variables
-
-Create a `.env` file with the following variables:
+The checked-in Vite configuration uses [http://localhost:8080](http://localhost:8080).
+For a UI demonstration without provider calls, set this in `frontend/.env`:
 
 ```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/seo_llm_audit
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# LLM API Keys
-OPENAI_API_KEY=your_openai_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
-PERPLEXITY_API_KEY=your_perplexity_api_key
-GOOGLE_API_KEY=your_google_api_key
-
-# Security
-SECRET_KEY=your_secret_key
-JWT_SECRET=your_jwt_secret
+VITE_USE_MOCK=true
 ```
 
-## 📖 Documentation
+For the backend connection:
 
-- [Architecture Document](./docs/architecture.md) - Detailed system architecture and design decisions
-- [Workflow Guide](./docs/workflow.md) - Complete end-to-end workflow implementation guide
-- [API Documentation](http://localhost:8000/docs) - Interactive API documentation (when backend is running)
-
-## 🔧 Development
-
-### Project Structure
-```
-llm-seo-evaluator/
-├── src/                    # Frontend React application
-│   ├── components/        # React components
-│   ├── services/          # API services and utilities
-│   ├── hooks/             # Custom React hooks
-│   ├── types/             # TypeScript type definitions
-│   └── pages/             # Page components
-├── backend/               # FastAPI backend (to be implemented)
-├── docs/                  # Project documentation
-│   ├── architecture.md    # System architecture
-│   └── workflow.md        # Workflow implementation guide
-└── README.md              # This file
+```env
+VITE_API_URL=http://localhost:8000
+VITE_USE_MOCK=false
 ```
 
-### Available Scripts
+Some history and result-display paths still construct placeholder data. Treat
+the demonstration UI as a prototype and verify displayed responses against
+the backend records when using real runs.
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run preview` - Preview production build
+## Backend development
 
-## 🎯 Features
+The backend requires Python, a configured Supabase project and tables, and API
+keys for the selected providers. From `backend/`:
 
-### Current Features
-- ✅ Modern React frontend with TypeScript
-- ✅ Responsive UI with Tailwind CSS and shadcn/ui
-- ✅ Component-based architecture
-- ✅ Type-safe development environment
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements_clean.txt
+pip install supabase
+cp env.example .env
+```
 
-### Planned Features
-- 🔄 Backend API with FastAPI
-- 🔄 LLM provider integrations
-- 🔄 Real-time query processing
-- 🔄 Response similarity analysis
-- 🔄 Quality metrics calculation
-- 🔄 Export and sharing functionality
-- 🔄 User authentication and history
-- 🔄 Advanced analytics dashboard
+The Supabase client is imported by the code but is missing from both dependency
+manifests, which is why it is listed separately above. The backend setup and
+database schema still need a complete reproducibility pass.
 
-## 🤝 Contributing
+Add the Supabase settings and the keys needed for the providers being used:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-supabase-key
+OPENAI_API_KEY=your-openai-key
+ANTHROPIC_API_KEY=your-anthropic-key
+PERPLEXITY_API_KEY=your-perplexity-key
+GOOGLE_API_KEY=your-google-key
+ALLOWED_ORIGINS=["http://localhost:8080","http://127.0.0.1:8080"]
+```
 
-## 📄 License
+The origins above match the checked-in frontend port. Provider model defaults
+are defined in `backend/app/core/config.py` and the provider adapters; check
+them against the models available to the configured accounts.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The service expects `queries`, `responses`, and `evaluation_metrics` tables.
+The current field mappings are in `backend/app/services/supabase_service.py`.
+The SQL in the design documents is an initial schema, not a complete migration
+for the current code.
 
-## 🆘 Support
+After configuring those dependencies:
 
-If you encounter any issues or have questions:
+```bash
+uvicorn app.main:app --reload --port 8000
+```
 
-1. Check the [documentation](./docs/)
-2. Search existing [issues](../../issues)
-3. Create a new issue with detailed information
+API documentation is at [http://localhost:8000/docs](http://localhost:8000/docs).
 
-## 🗺️ Roadmap
+## Repository layout
 
-### Phase 1: Core Infrastructure (Week 1-2)
-- [ ] Set up FastAPI backend structure
-- [ ] Implement PostgreSQL database models
-- [ ] Configure Redis for task queuing
-- [ ] Create basic API endpoints
+| Path | Contents |
+|---|---|
+| `frontend/src/components/` | Query, progress, comparison, and history views |
+| `frontend/src/services/api.ts` | API client, polling, and mock mode |
+| `frontend/src/services/mockData.ts` | UI demonstration data |
+| `backend/app/api/v1/` | Query and analytics endpoints |
+| `backend/app/services/llm_providers/` | Provider interfaces and adapters |
+| `backend/app/services/orchestrator.py` | Concurrent calls, persistence, and metric generation |
+| `backend/app/services/evaluation.py` | Text-analysis heuristics |
+| `backend/app/services/supabase_service.py` | Storage access and field mappings |
+| `backend/test_*.py` | Development and integration checks |
+| `docs/` | Initial architecture and workflow notes |
 
-### Phase 2: LLM Integration (Week 3-4)
-- [ ] Implement OpenAI provider
-- [ ] Implement Claude provider
-- [ ] Add response storage and retrieval
-- [ ] Create query orchestration system
+Frontend scripts, run from `frontend/`:
 
-### Phase 3: Evaluation Engine (Week 5-6)
-- [ ] Implement similarity analysis
-- [ ] Add quality metrics calculation
-- [ ] Create response comparison interface
-- [ ] Build analytics dashboard
+```bash
+npm run build
+npm run lint
+npm run preview
+```
 
-### Phase 4: Enhancement (Week 7-8)
-- [ ] Add WebSocket real-time updates
-- [ ] Implement export functionality
-- [ ] Add user authentication
-- [ ] Performance optimization
+## Remaining work
 
----
+The project still needs consistent provider metadata in stored results,
+replacement of placeholder history paths, a complete schema/dependency setup,
+and evaluation against independently labeled answers. The retry path currently
+uses fixed provider defaults rather than persisting the original selection.
 
-**Built with ❤️ for the SEO community**
+Authentication, durable job queues, and WebSocket updates remain extensions to
+the current implementation.
+
+## Documentation
+
+- [Initial architecture](docs/architecture.md)
+- [Initial workflow design](docs/workflow.md)
+
+## License
+
+MIT, as stated in the original README. A standalone license file is not included.

@@ -1,5 +1,8 @@
 # SEO LLM Evaluation Agent - Complete Workflow Guide
 
+These are initial design notes. The current implementation uses Supabase, FastAPI background tasks, HTTP polling, and heuristic text metrics. Celery/Redis job execution, WebSocket updates, authentication, performance targets, and sample numerical results in these notes describe proposals or illustrations. See the [README](../README.md) for current scope and setup.
+
+
 ## Overview
 This document provides a step-by-step breakdown of the entire workflow for the LLM Evaluation Agent, from user input to final results display. Each section includes implementation details for both backend and frontend components.
 
@@ -15,11 +18,11 @@ This document provides a step-by-step breakdown of the entire workflow for the L
 **STEP 1 (Frontend - 0 seconds): User Fills Out Query Form**
 - User fills out query form with:
   - **SEO prompt/question**: This is the main SEO question the user wants answered (e.g., "What are the best Python automation scripts for SEO in 2025?"). This is the core input that will be sent to all LLM providers to get their different perspectives and advice.
-  
+
   - **Category selection (Technical SEO, Content, Link Building, etc.)**: The user categorizes their question to help organize and filter results later. For example, if they're asking about page speed optimization, they'd select "Technical SEO". This helps the system organize queries and allows users to analyze trends within specific SEO categories over time.
-  
+
   - **Tags (optional)**: Additional keywords the user can add to help organize and search their queries later (e.g., "python", "automation", "2025"). These act like hashtags - they make it easier to find similar queries in the future and help with analytics to see what topics are being asked about most frequently.
-  
+
   - **LLM provider selection (checkboxes for OpenAI, Claude, Perplexity, Gemini)**: The user chooses which AI models they want to query. They might select all 4 to get maximum perspective, or just 2-3 if they want faster results or have budget constraints. Different LLMs often give different advice, so comparing multiple providers is the core value of this tool.
 
 **STEP 2 (Frontend - 0 seconds): User Clicks Submit**
@@ -43,7 +46,7 @@ This document provides a step-by-step breakdown of the entire workflow for the L
 - **Implement WebSocket connection for real-time updates**: Now we establish a live connection to `ws://server.com/queries/abc-123-def/status`. This is NOT for seeing actual LLM responses live - it's for progress updates like:
   * "OpenAI query started"
   * "OpenAI completed (1/4 providers done)"
-  * "Claude query started" 
+  * "Claude query started"
   * "Claude completed (2/4 providers done)"
   * "Starting similarity analysis..."
   * "Analysis complete - results ready!"
@@ -89,7 +92,7 @@ class OpenAIProvider(BaseLLMProvider):
 
 class ClaudeProvider(BaseLLMProvider):
     async def query(self, prompt: str) -> LLMResponse:
-        # Calls Anthropic's specific API format  
+        # Calls Anthropic's specific API format
         response = await anthropic.messages.create(...)
         return LLMResponse(text=response.content, tokens=response.tokens)
 ```
@@ -101,7 +104,7 @@ class ClaudeProvider(BaseLLMProvider):
 
 - **How Parallel Execution Works**:
   * Worker 1 picks up "Query OpenAI for abc-123" task
-  * Worker 2 picks up "Query Claude for abc-123" task  
+  * Worker 2 picks up "Query Claude for abc-123" task
   * Both workers start their API calls at the same time
   * Each worker processes independently - if OpenAI responds in 10 seconds but Claude takes 25 seconds, we don't wait for Claude to start processing the OpenAI response
 
@@ -129,7 +132,7 @@ For each selected LLM provider, this happens in parallel:
 - **WebSocket broadcasts when each LLM responds**: As soon as OpenAI finishes, the WebSocket sends a message to the user's browser like "OpenAI completed (1/3 providers done)"
 - **Send progress updates to frontend**: User sees messages like:
   * "Querying OpenAI and Claude..." (both started)
-  * "OpenAI completed, waiting for Claude..." (OpenAI done, Claude still working)  
+  * "OpenAI completed, waiting for Claude..." (OpenAI done, Claude still working)
   * "All providers completed, analyzing responses..." (both done, starting comparison)
 
 **STEP 13 (Backend - Throughout): Error Handling and Integration**
@@ -139,7 +142,7 @@ For each selected LLM provider, this happens in parallel:
 
 **STEP 14 (Frontend - Real-time): User Experience During Wait**
 - User sees a progress indicator like "2 of 3 providers completed"
-- Status messages update in real-time: "OpenAI: ✓ Complete" "Claude: ⏳ Processing" "Perplexity: ⏳ In queue"
+- Status messages update in real-time: "OpenAI:  Complete" "Claude: ⏳ Processing" "Perplexity: ⏳ In queue"
 - Estimated time updates: "Usually takes 30 seconds, about 15 seconds remaining"
 - User can't submit another query while this one is processing (to prevent overloading)
 
@@ -159,7 +162,7 @@ For each selected LLM provider, this happens in parallel:
 - **When this starts**: This phase begins automatically when ALL selected LLM providers have either completed successfully or failed permanently from Phase 2.
 - **What we have at this point**: Let's say user asked "What are the best Python SEO scripts?" and we have 3 responses:
   * OpenAI response: 500 words about specific scripts
-  * Claude response: 400 words with different script recommendations  
+  * Claude response: 400 words with different script recommendations
   * Perplexity response: 600 words with web-sourced script examples
 - **The goal**: Compare these responses to find similarities, differences, and quality patterns
 
@@ -174,12 +177,12 @@ class SimilarityAnalyzer:
     def __init__(self):
         # This converts text to numbers that computers can compare
         self.sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
-    
+
     def calculate_cosine_similarity(self, responses):
         # Convert each response to a vector of numbers
         openai_vector = [0.2, 0.5, 0.8, 0.1, ...]  # 384 numbers representing OpenAI response
         claude_vector = [0.3, 0.4, 0.7, 0.2, ...]  # 384 numbers representing Claude response
-        
+
         # Calculate how similar these number patterns are (0 = completely different, 1 = identical)
         similarity_score = cosine_similarity(openai_vector, claude_vector)  # Result: 0.73 (73% similar)
 ```
@@ -188,7 +191,7 @@ class SimilarityAnalyzer:
 
 **STEP 17b: Jaccard Similarity - "How Much Do They Share the Same Keywords?"**
 - **What it does**: Looks at actual words/phrases rather than meaning
-- **Example**: 
+- **Example**:
   * OpenAI mentions: ["selenium", "beautifulsoup", "scrapy", "python", "automation"]
   * Claude mentions: ["selenium", "requests", "scrapy", "python", "workflow"]
   * Shared words: 4 out of 7 unique words = 57% Jaccard similarity
@@ -209,7 +212,7 @@ def calculate_originality(response, all_other_responses):
         similarity(response, claude_response),    # 0.73
         similarity(response, perplexity_response) # 0.45
     ])  # max_similarity = 0.73
-    
+
     originality = 1.0 - max_similarity  # 1.0 - 0.73 = 0.27 (27% original)
     return originality
 ```
@@ -261,7 +264,7 @@ comparison_result = {
 
 **Examples of Trends We Can Detect**:
 - **Topic trends**: "Python automation questions increased 40% this month"
-- **LLM consistency trends**: "OpenAI and Claude similarity decreased from 80% to 60% over past quarter" 
+- **LLM consistency trends**: "OpenAI and Claude similarity decreased from 80% to 60% over past quarter"
 - **Tool mention trends**: "Screaming Frog mentioned in 85% of technical SEO responses"
 - **Response quality trends**: "Average originality scores improving as LLMs get better"
 
@@ -269,7 +272,7 @@ comparison_result = {
 ```sql
 -- Example: Find most mentioned tools in past 30 days
 SELECT tool_name, COUNT(*) as mentions
-FROM evaluation_metrics 
+FROM evaluation_metrics
 WHERE computed_at > NOW() - INTERVAL '30 days'
 AND tool_mentions ? 'tool_name'  -- PostgreSQL JSON query
 GROUP BY tool_name
@@ -300,7 +303,7 @@ ORDER BY mentions DESC;
 - **What data gets loaded**:
   * Original user query and metadata
   * All LLM responses with their text
-  * Similarity matrices and originality scores  
+  * Similarity matrices and originality scores
   * Cross-model comparisons and insights
   * Keyword extractions and tool mentions
 
@@ -310,13 +313,13 @@ ORDER BY mentions DESC;
 Each LLM gets its own card displaying:
 ```
 ┌─────────────────────────────────────┐
-│ 🤖 OpenAI GPT-4            ⭐ 73%   │ ← Provider badge + Originality score
+│  OpenAI GPT-4            ⭐ 73%   │ ← Provider badge + Originality score
 ├─────────────────────────────────────┤
 │ Here are the best Python SEO       │
 │ scripts for 2025...                 │ ← Full response text (formatted)
 │ [500 words of response]             │
 ├─────────────────────────────────────┤
-│ 📊 Metrics:                         │
+│  Metrics:                         │
 │ • Similarity to others: 68%         │ ← How similar to other responses
 │ • Keywords found: 12                │ ← SEO terms mentioned
 │ • Tools mentioned: Scrapy, Selenium │ ← Specific tools recommended
@@ -361,7 +364,7 @@ Perplexity ████████░░ 28.7s
 
 **Response Filtering**: User can filter what they see
 - **By similarity threshold**: "Only show responses that are less than 50% similar"
-- **By provider**: "Only show OpenAI and Claude responses"  
+- **By provider**: "Only show OpenAI and Claude responses"
 - **By quality score**: "Only show responses with >70% originality"
 - **By keywords**: "Only show responses mentioning 'automation'"
 
@@ -380,7 +383,7 @@ Perplexity ████████░░ 28.7s
 
 ---
 
-## 🏗️ Backend Architecture Implementation
+## Backend Architecture Implementation
 
 ### 1. Project Structure
 ```
@@ -449,7 +452,7 @@ import uuid
 
 class Query(Base):
     __tablename__ = "queries"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     prompt = Column(Text, nullable=False)
     category = Column(String(100))
@@ -457,7 +460,7 @@ class Query(Base):
     user_id = Column(String(100))
     created_at = Column(DateTime, default=datetime.utcnow)
     status = Column(String(20), default="pending")
-    
+
     # Relationships
     responses = relationship("Response", back_populates="query")
     metrics = relationship("EvaluationMetric", back_populates="query")
@@ -473,12 +476,12 @@ class BaseLLMProvider(ABC):
     def __init__(self, api_key: str, model: str):
         self.api_key = api_key
         self.model = model
-    
+
     @abstractmethod
     async def query(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Execute query against LLM provider"""
         pass
-    
+
     @abstractmethod
     def get_provider_name(self) -> str:
         """Return provider identification"""
@@ -495,27 +498,27 @@ from sklearn.metrics.pairwise import cosine_similarity
 class SimilarityAnalyzer:
     def __init__(self):
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
-    
+
     async def analyze_responses(self, responses: List[str]) -> Dict:
         # Generate embeddings
         embeddings = self.model.encode(responses)
-        
+
         # Calculate similarity matrix
         similarity_matrix = cosine_similarity(embeddings)
-        
+
         # Calculate originality scores
         originality_scores = self._calculate_originality(similarity_matrix)
-        
+
         return {
             "similarity_matrix": similarity_matrix.tolist(),
             "originality_scores": originality_scores,
             "average_similarity": np.mean(similarity_matrix[np.triu_indices_from(similarity_matrix, k=1)])
         }
-    
+
     def _calculate_originality(self, similarity_matrix: np.ndarray) -> List[float]:
         n = similarity_matrix.shape[0]
         originality_scores = []
-        
+
         for i in range(n):
             # Get similarities with other responses (excluding self)
             similarities = np.concatenate([
@@ -525,7 +528,7 @@ class SimilarityAnalyzer:
             max_similarity = np.max(similarities) if len(similarities) > 0 else 0
             originality = 1.0 - max_similarity
             originality_scores.append(float(originality))
-        
+
         return originality_scores
 ```
 
@@ -540,15 +543,15 @@ async def query_llm_provider(self, query_id: str, provider_name: str, prompt: st
     try:
         provider = get_provider(provider_name)
         response = await provider.query(prompt)
-        
+
         # Store response in database
         await store_llm_response(query_id, provider_name, response)
-        
+
         # Emit WebSocket update
         await emit_progress_update(query_id, f"{provider_name} completed")
-        
+
         return response
-        
+
     except Exception as exc:
         # Retry logic
         if self.request.retries < self.max_retries:
@@ -560,7 +563,7 @@ async def query_llm_provider(self, query_id: str, provider_name: str, prompt: st
 
 ---
 
-## 🎨 Frontend Architecture Implementation
+## Frontend Architecture Implementation
 
 ### 1. Project Structure
 ```
@@ -739,11 +742,11 @@ export const ResponseComparison: React.FC<ResponseComparisonProps> = ({
 
       {/* Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SimilarityMatrix 
+        <SimilarityMatrix
           similarity={metrics.similarityMatrix}
           providers={responses.map(r => r.provider)}
         />
-        <MetricsChart 
+        <MetricsChart
           responses={responses}
           metrics={metrics}
         />
@@ -771,20 +774,20 @@ export const useWebSocket = (queryId: string) => {
 
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:8000/ws/queries/${queryId}/status`);
-    
+
     ws.onopen = () => {
       setIsConnected(true);
     };
-    
+
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setProgress(data);
     };
-    
+
     ws.onclose = () => {
       setIsConnected(false);
     };
-    
+
     return () => {
       ws.close();
     };
@@ -796,7 +799,7 @@ export const useWebSocket = (queryId: string) => {
 
 ---
 
-## 🔗 Frontend-Backend Integration
+## Frontend-Backend Integration
 
 ### 1. API Client Setup
 ```typescript
@@ -858,7 +861,7 @@ interface QueryState {
   metrics: EvaluationMetrics | null;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   setCurrentQuery: (query: Query) => void;
   setResponses: (responses: LLMResponse[]) => void;
@@ -874,7 +877,7 @@ export const useQueryStore = create<QueryState>((set) => ({
   metrics: null,
   isLoading: false,
   error: null,
-  
+
   setCurrentQuery: (query) => set({ currentQuery: query }),
   setResponses: (responses) => set({ responses }),
   setMetrics: (metrics) => set({ metrics }),
@@ -892,7 +895,7 @@ export const useQueryStore = create<QueryState>((set) => ({
 
 ---
 
-## 🚀 Development Priorities
+## Development Priorities
 
 ### Phase 1: Core Infrastructure (Week 1-2)
 1. **Backend Setup**
@@ -939,7 +942,7 @@ export const useQueryStore = create<QueryState>((set) => ({
 
 ---
 
-## 📋 Next Immediate Steps
+## Next Immediate Steps
 
 1. **Set up development environment** with Docker Compose
 2. **Create basic FastAPI structure** with database models
@@ -948,5 +951,3 @@ export const useQueryStore = create<QueryState>((set) => ({
 5. **Test end-to-end flow** with one provider
 6. **Add evaluation framework** with similarity analysis
 7. **Scale to multiple providers** and full feature set
-
-This workflow guide provides the complete roadmap for implementation. Would you like me to start generating the actual code files for any specific component? 

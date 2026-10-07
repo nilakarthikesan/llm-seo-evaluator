@@ -1,9 +1,12 @@
 # LLM Evaluation Agent for SEO Answer Auditing - Architecture Document
 
+These are initial design notes. The current implementation uses Supabase, FastAPI background tasks, HTTP polling, and heuristic text metrics. Celery/Redis job execution, WebSocket updates, authentication, performance targets, and sample numerical results in these notes describe proposals or illustrations. See the [README](../README.md) for current scope and setup.
+
+
 ## 1. Executive Summary
 
 ### 1.1 Project Overview
-The LLM Evaluation Agent for SEO Answer Auditing is a comprehensive system designed to query multiple Large Language Models (LLMs) with SEO-related prompts and perform systematic auditing of their responses. The system enables cross-model comparison, trend analysis, and quality assessment of AI-generated SEO advice.
+The LLM Evaluation Agent for SEO Answer Auditing is a proposed system designed to query multiple Large Language Models (LLMs) with SEO-related prompts and perform systematic auditing of their responses. The system enables cross-model comparison, trend analysis, and quality assessment of AI-generated SEO advice.
 
 ### 1.2 Business Objectives
 - **Primary**: Create a standardized evaluation framework for assessing LLM-generated SEO content
@@ -99,7 +102,7 @@ CREATE TABLE queries (
     status VARCHAR(20) DEFAULT 'pending'
 );
 
--- responses table  
+-- responses table
 CREATE TABLE responses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     query_id UUID REFERENCES queries(id),
@@ -135,7 +138,7 @@ CREATE TABLE evaluation_metrics (
 ```json
 {
   "prompt": "What are the best Python automation scripts for SEO in 2025?",
-  "category": "automation", 
+  "category": "automation",
   "tags": ["python", "seo", "scripts"],
   "providers": ["openai", "claude", "perplexity"]
 }
@@ -148,7 +151,7 @@ CREATE TABLE evaluation_metrics (
   "responses": [
     {
       "provider": "openai",
-      "model": "gpt-4", 
+      "model": "gpt-4",
       "response_text": "Here are the top Python SEO scripts...",
       "metrics": {
         "similarity_to_others": 0.73,
@@ -175,7 +178,7 @@ def calculate_originality(response, all_responses):
     Originality = 1 - max(similarity_to_others)
     Range: 0.0 (completely duplicate) to 1.0 (completely unique)
     """
-    max_similarity = max(cosine_similarity(response, other) 
+    max_similarity = max(cosine_similarity(response, other)
                         for other in all_responses if other != response)
     return 1.0 - max_similarity
 ```
@@ -220,12 +223,12 @@ services:
       POSTGRES_PASSWORD: dev
     ports:
       - "5432:5432"
-      
+
   redis:
     image: redis:7
     ports:
       - "6379:6379"
-      
+
   backend:
     build: ./backend
     ports:
@@ -233,7 +236,7 @@ services:
     depends_on:
       - db
       - redis
-      
+
   frontend:
     build: ./frontend
     ports:
@@ -254,4 +257,4 @@ services:
 3. Develop basic evaluation metrics
 4. Create MVP frontend for query submission and result display
 5. Implement comprehensive testing suite
-6. Deploy staging environment for user testing 
+6. Deploy staging environment for user testing
